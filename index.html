@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRD Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BRD Automation Prototype</h1>
+            <p>Upload your files or enter a URL to extract images for analysis.</p>
+        </header>
+        <main>
+            <section>
+                <h2>File Upload</h2>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" name="file" required />
+                    <button type="submit">Upload</button>
+                </form>
+            </section>
+            <section>
+                <h2>URL Input</h2>
+                <form id="urlForm">
+                    <input type="url" name="url" placeholder="Enter a URL" required />
+                    <button type="submit">Fetch Images</button>
+                </form>
+            </section>
+            <section id="output">
+                <h2>Output</h2>
+                <div id="result"></div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
