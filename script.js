@@ -2,7 +2,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     event.preventDefault();
     const formData = new FormData(this);
 
-    const response = await fetch('/upload', {
+    const response = await fetch('http://localhost:3000/upload', { // Pointing to localhost
         method: 'POST',
         body: formData
     });
@@ -15,7 +15,7 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
     event.preventDefault();
     const url = this.url.value;
 
-    const response = await fetch('/url', {
+    const response = await fetch('http://localhost:3000/url', { // Pointing to localhost
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
