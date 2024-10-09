@@ -25,4 +25,12 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
 
     const result = await response.json();
     document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+    
+    // Display the screenshot if available
+    if (result.screenshot) {
+        document.getElementById('screenshot').innerHTML = `
+            <h3>Screenshot:</h3>
+            <img src="${result.screenshot}" alt="Screenshot" style="max-width: 100%; height: auto;">
+        `;
+    }
 });
