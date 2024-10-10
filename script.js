@@ -1,11 +1,11 @@
 document.getElementById('uploadForm').addEventListener('submit', async function (event) {
-    event.preventDefault(); // Prevent the default form submission
-    const formData = new FormData(this); // Create FormData from the form
+    event.preventDefault();
+    const formData = new FormData(this);
 
     try {
-        const response = await fetch('http://localhost:3000/upload', { // Pointing to localhost
+        const response = await fetch('http://localhost:3000/upload', {
             method: 'POST',
-            body: formData // Send the FormData as the request body
+            body: formData
         });
 
         if (!response.ok) {
@@ -14,23 +14,29 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        if (result.screenshot) {
+            const img = new Image();
+            img.src = result.screenshot;
+            img.onload = () => runOpenCVDetection(img);
+        }
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('result').innerHTML = `<pre>Error: ${error.message}</pre>`;
     }
 });
 
+// URL Form Handler
 document.getElementById('urlForm').addEventListener('submit', async function (event) {
-    event.preventDefault(); // Prevent default form submission
-    const url = this.url.value; // Get the URL value
+    event.preventDefault();
+    const url = this.url.value;
 
     try {
-        const response = await fetch('http://localhost:3000/url', { // Pointing to localhost
+        const response = await fetch('http://localhost:3000/url', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ url }) // Send the URL in JSON format
+            body: JSON.stringify({ url })
         });
 
         if (!response.ok) {
@@ -40,23 +46,59 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
         
-        // Display the screenshot if available
+        // Handle screenshot and display it for detection
         if (result.screenshot) {
-            document.getElementById('screenshot').innerHTML = `
-                <h3>Screenshot:</h3>
-                <img src="${result.screenshot}" alt="Screenshot" style="max-width: 100%; height: auto;">
-            `;
-        }
-
-        // Display the Figma document children sample
-        if (result.childrenSample) {
-            document.getElementById('result').innerHTML += `
-                <h4>Figma Document Children Sample:</h4>
-                <pre>${JSON.stringify(result.childrenSample, null, 2)}</pre>
-            `;
+            const img = new Image();
+            img.src = result.screenshot;
+            img.onload = () => runOpenCVDetection(img);
         }
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('result').innerHTML = `<pre>Error: ${error.message}</pre>`;
     }
 });
+
+// OpenCV.js Detection Function
+function runOpenCVDetection(img) {
+    const canvasOutput = document.getElementById('canvasOutput');
+    const ctx = canvasOutput.getContext('2d');
+    
+    canvasOutput.width = img.width;
+    canvasOutput.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    let src = cv.imread(canvasOutput);
+    let gray = new cv.Mat();
+    let edges = new cv.Mat();
+    let contours = new cv.MatVector();
+    let hierarchy = new cv.Mat();
+
+    // Convert to grayscale
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+
+    // Apply Canny Edge Detection
+    cv.Canny(gray, edges, 50, 100);
+
+    // Find contours
+    cv.findContours(edges, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
+
+    // Draw rectangles for detected contours
+    for (let i = 0; i < contours.size(); ++i) {
+        let cnt = contours.get(i);
+        let rect = cv.boundingRect(cnt);
+        let aspectRatio = rect.width / rect.height;
+
+        // Filter for rectangular shapes (potential buttons)
+        if (aspectRatio > 1.5 && aspectRatio < 4) { // Adjust ratio for button-like shapes
+            let point1 = new cv.Point(rect.x, rect.y);
+            let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+            cv.rectangle(src, point1, point2, [255, 0, 0, 255], 2);
+        }
+    }
+
+    // Display the output
+    cv.imshow('canvasOutput', src);
+
+    // Clean up
+    src.delete(); gray.delete(); edges.delete(); contours.delete(); hierarchy.delete();
+}
