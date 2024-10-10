@@ -19,25 +19,15 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
 
-        // Display the uploaded image and any extracted images
-        if (result.filePath) {
-            const img = new Image();
-            img.src = result.filePath; // Set the source to the uploaded file path
-            img.alt = "Uploaded file";
-            img.onload = () => {
-                document.getElementById('screenshot').innerHTML = ''; // Clear previous images
-                document.getElementById('screenshot').appendChild(img); // Append the image to the output div
-            };
-        }
-
-        // Display images extracted from Word documents
+        // Display all uploaded images
         if (result.images && result.images.length > 0) {
-            result.images.forEach(imagePath => {
+            document.getElementById('screenshot').innerHTML = ''; // Clear previous images
+            result.images.forEach(imgPath => {
                 const img = new Image();
-                img.src = imagePath; // Set the source to the extracted image path
-                img.alt = "Extracted image";
+                img.src = imgPath; // Set the source to the uploaded file path
+                img.alt = "Uploaded file";
                 img.onload = () => {
-                    document.getElementById('screenshot').appendChild(img); // Append each extracted image to the output div
+                    document.getElementById('screenshot').appendChild(img); // Append the image to the output div
                 };
             });
         }
@@ -99,7 +89,7 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
     }
 });
 
-// OpenCV.js Detection Function (as defined earlier)
+// OpenCV.js Detection Function (same as previous)
 function runOpenCVDetection(img) {
     const canvasOutput = document.getElementById('canvasOutput');
     const ctx = canvasOutput.getContext('2d');
