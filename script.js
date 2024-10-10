@@ -1,11 +1,15 @@
+// File upload handler
 document.getElementById('uploadForm').addEventListener('submit', async function (event) {
-    event.preventDefault();
-    const formData = new FormData(this);
+    event.preventDefault(); // Prevent the default form submission
+    const formData = new FormData(this); // Create FormData from the form
+
+    // Show loading indicator
+    document.getElementById('result').innerHTML = 'Loading...';
 
     try {
-        const response = await fetch('http://localhost:3000/upload', {
+        const response = await fetch('http://localhost:3000/upload', { // Pointing to localhost
             method: 'POST',
-            body: formData
+            body: formData // Send the FormData as the request body
         });
 
         if (!response.ok) {
@@ -14,17 +18,16 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
-        
-        // Handle screenshot and display it for detection
-        if (result.screenshot) {
+
+        // Display the uploaded image and run OpenCV detection
+        if (result.filePath) {
             const img = new Image();
-            img.src = result.screenshot;
+            img.src = result.filePath; // Set the source to the uploaded file path
+            img.alt = "Uploaded file";
             img.onload = () => {
-                console.log("Image loaded successfully:", img.src);
-                runOpenCVDetection(img);
-            };
-            img.onerror = (error) => {
-                console.error("Error loading image:", error);
+                document.getElementById('screenshot').innerHTML = ''; // Clear previous images
+                document.getElementById('screenshot').appendChild(img); // Append the image to the output div
+                runOpenCVDetection(img); // Run OpenCV detection on the uploaded image
             };
         }
     } catch (error) {
@@ -33,18 +36,21 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
     }
 });
 
-// URL Form Handler
+// URL input handler
 document.getElementById('urlForm').addEventListener('submit', async function (event) {
-    event.preventDefault();
-    const url = this.url.value;
+    event.preventDefault(); // Prevent default form submission
+    const url = this.url.value; // Get the URL value
+
+    // Show loading indicator
+    document.getElementById('result').innerHTML = 'Loading...';
 
     try {
-        const response = await fetch('http://localhost:3000/url', {
+        const response = await fetch('http://localhost:3000/url', { // Pointing to localhost
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ url })
+            body: JSON.stringify({ url }) // Send the URL in JSON format
         });
 
         if (!response.ok) {
@@ -53,18 +59,29 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
-        
-        // Handle screenshot and display it for detection
-        if (result.screenshot) {
+
+        // Display the screenshot if available and run OpenCV detection
+        if (result.filePath) {
             const img = new Image();
-            img.src = result.screenshot;
+            img.src = result.filePath; // Set the source to the screenshot path
+            img.alt = "Screenshot";
             img.onload = () => {
-                console.log("Image loaded successfully:", img.src);
-                runOpenCVDetection(img);
+                document.getElementById('screenshot').innerHTML = ''; // Clear previous images
+                document.getElementById('screenshot').appendChild(img); // Append the image to the output div
+                runOpenCVDetection(img); // Run OpenCV detection on the screenshot
             };
-            img.onerror = (error) => {
-                console.error("Error loading image:", error);
-            };
+        }
+
+        // Display Figma child canvases
+        if (result.childrenSample) {
+            const childrenContainer = document.createElement('div');
+            childrenContainer.innerHTML = '<h3>Figma Child Canvases:</h3>';
+            result.childrenSample.forEach(child => {
+                const childDiv = document.createElement('div');
+                childDiv.innerText = `Name: ${child.name}, Type: ${child.type}`;
+                childrenContainer.appendChild(childDiv);
+            });
+            document.getElementById('result').appendChild(childrenContainer);
         }
     } catch (error) {
         console.error('Error:', error);
@@ -79,9 +96,9 @@ function runOpenCVDetection(img) {
     
     canvasOutput.width = img.width;
     canvasOutput.height = img.height;
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0); // Draw the image on the canvas
 
-    let src = cv.imread(canvasOutput);
+    let src = cv.imread(canvasOutput); // Read the canvas as an image
     let gray = new cv.Mat();
     let edges = new cv.Mat();
     let contours = new cv.MatVector();
@@ -110,7 +127,7 @@ function runOpenCVDetection(img) {
         }
     }
 
-    // Display the output
+    // Display the output on the canvas
     cv.imshow('canvasOutput', src);
 
     // Clean up
