@@ -19,7 +19,7 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
 
-        // Display the uploaded image and run OpenCV detection
+        // Display the uploaded image and any extracted images
         if (result.filePath) {
             const img = new Image();
             img.src = result.filePath; // Set the source to the uploaded file path
@@ -27,8 +27,19 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
             img.onload = () => {
                 document.getElementById('screenshot').innerHTML = ''; // Clear previous images
                 document.getElementById('screenshot').appendChild(img); // Append the image to the output div
-                runOpenCVDetection(img); // Run OpenCV detection on the uploaded image
             };
+        }
+
+        // Display images extracted from Word documents
+        if (result.images && result.images.length > 0) {
+            result.images.forEach(imagePath => {
+                const img = new Image();
+                img.src = imagePath; // Set the source to the extracted image path
+                img.alt = "Extracted image";
+                img.onload = () => {
+                    document.getElementById('screenshot').appendChild(img); // Append each extracted image to the output div
+                };
+            });
         }
     } catch (error) {
         console.error('Error:', error);
@@ -60,7 +71,7 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
 
-        // Display the screenshot if available and run OpenCV detection
+        // Display the screenshot if available
         if (result.filePath) {
             const img = new Image();
             img.src = result.filePath; // Set the source to the screenshot path
@@ -68,7 +79,6 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
             img.onload = () => {
                 document.getElementById('screenshot').innerHTML = ''; // Clear previous images
                 document.getElementById('screenshot').appendChild(img); // Append the image to the output div
-                runOpenCVDetection(img); // Run OpenCV detection on the screenshot
             };
         }
 
@@ -89,7 +99,7 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
     }
 });
 
-// OpenCV.js Detection Function
+// OpenCV.js Detection Function (as defined earlier)
 function runOpenCVDetection(img) {
     const canvasOutput = document.getElementById('canvasOutput');
     const ctx = canvasOutput.getContext('2d');
