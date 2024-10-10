@@ -24,8 +24,9 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
             document.getElementById('screenshot').innerHTML = ''; // Clear previous images
             result.images.forEach(imgPath => {
                 const img = new Image();
-                // Construct the full URL for the image
-                img.src = `http://localhost:3000${imgPath}`; // Use localhost during development
+                const fullPath = `http://localhost:3000${imgPath}`; // Construct the full URL for the image
+                console.log("Loading image from path:", fullPath); // Log the full path for debugging
+                img.src = fullPath; // Set the source to the constructed path
                 img.alt = "Uploaded file";
                 img.onload = () => {
                     document.getElementById('screenshot').appendChild(img); // Append the image to the output div
