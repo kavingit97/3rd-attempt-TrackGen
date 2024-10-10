@@ -14,10 +14,18 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
 
         const result = await response.json();
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        
+        // Handle screenshot and display it for detection
         if (result.screenshot) {
             const img = new Image();
             img.src = result.screenshot;
-            img.onload = () => runOpenCVDetection(img);
+            img.onload = () => {
+                console.log("Image loaded successfully:", img.src);
+                runOpenCVDetection(img);
+            };
+            img.onerror = (error) => {
+                console.error("Error loading image:", error);
+            };
         }
     } catch (error) {
         console.error('Error:', error);
@@ -50,7 +58,13 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
         if (result.screenshot) {
             const img = new Image();
             img.src = result.screenshot;
-            img.onload = () => runOpenCVDetection(img);
+            img.onload = () => {
+                console.log("Image loaded successfully:", img.src);
+                runOpenCVDetection(img);
+            };
+            img.onerror = (error) => {
+                console.error("Error loading image:", error);
+            };
         }
     } catch (error) {
         console.error('Error:', error);
