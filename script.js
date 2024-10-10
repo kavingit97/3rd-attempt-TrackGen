@@ -64,7 +64,13 @@ document.getElementById('urlForm').addEventListener('submit', async function (ev
         }
 
         const result = await response.json();
+        const figmaData = result.figmaData;
+
+        // Store the result in a global window object to access it from the console
+        window.figmaData = figmaData;
+        
         document.getElementById('result').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        
 
         // Display the screenshot if available
         if (result.filePath) {
