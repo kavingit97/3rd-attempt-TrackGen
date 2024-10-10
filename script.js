@@ -24,10 +24,14 @@ document.getElementById('uploadForm').addEventListener('submit', async function 
             document.getElementById('screenshot').innerHTML = ''; // Clear previous images
             result.images.forEach(imgPath => {
                 const img = new Image();
-                img.src = imgPath; // Set the source to the uploaded file path
+                // Construct the full URL for the image
+                img.src = `http://localhost:3000${imgPath}`; // Use localhost during development
                 img.alt = "Uploaded file";
                 img.onload = () => {
                     document.getElementById('screenshot').appendChild(img); // Append the image to the output div
+                };
+                img.onerror = (error) => {
+                    console.error("Error loading image:", error); // Log error if image fails to load
                 };
             });
         }
